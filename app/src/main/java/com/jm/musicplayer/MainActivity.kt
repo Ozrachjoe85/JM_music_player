@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.jm.musicplayer.audio.JMPlayerViewModel
 import com.jm.musicplayer.data.MusicScanner
 import com.jm.musicplayer.data.Song
@@ -21,14 +24,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class MainActivity : ComponentActivity() {
 
-    // JMPlayer ViewModel handles audio operations
     private val viewModel: JMPlayerViewModel by viewModels()
     private val scanner by lazy { MusicScanner(this) }
-    
-    // UI state for songs (starts empty)
     private val songsState = MutableStateFlow<List<Song>>(emptyList())
 
-    // Modern permission request handler
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
@@ -41,37 +40,57 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Initial permission check (simple flow)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+
             requestPermissionLauncher.launch(Manifest.permission.READ_MEDIA_AUDIO)
         } else {
-            // Android 12 and below
             requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
 
         setContent {
             JMMusicPlayerTheme {
+                val navController = rememberNavController()
+                val songs by songsState.collectAsState()
+                val currentTrackId by viewModel.currentPlayingTrackId.collectAsState()
+
+                // Surface fillMaxSize ensures we use the whole screen
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val songs by songsState.collectAsState()
-                    val currentTrackId by viewModel.currentPlayingTrackId.collectAsState()
-
-                    // Call the Library Screen (We will create this file next)
-                    LibraryScreen(
-                        songs = songs,
-                        currentTrackId = currentTrackId,
-                        onSongClicked = { song -> viewModel.playSong(song) }
-                    )
+                    NavHost(navController = navController, startDestination = "library") {
+                        composable("library") {
+                            LibraryScreen(
+                                songs = songs,
+                                currentTrackId = currentTrackId,
+                                onSongClicked = { song -> 
+                                    viewModel.playSong(song)
+                                    navController.navigate("now_playing")
+                                }
+                            )
+                        }
+                        composable("now_playing") {
+                            // Temporary placeholder to prevent crash until next file is added
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Text(
+                                    text = "NOW PLAYING SCREEN",
+                                    modifier = Modifier.align(androidx.compose.ui.Alignment.Center),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Button(
+                                    onClick = { navController.popBackStack() },
+                                    modifier = Modifier.padding(16.dp)
+                                ) {
+                                    Text("Back to Library")
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
     private fun refreshLibrary() {
-        // Scans on the main thread for simplicity in skeleton
         songsState.value = scanner.scanAudioFiles()
     }
 }
