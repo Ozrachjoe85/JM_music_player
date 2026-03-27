@@ -56,6 +56,9 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.material3:material3")
     
+    // Navigation Integration
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    
     // Media3 for Audio Playback
     implementation("androidx.media3:media3-exoplayer:1.2.1")
     implementation("androidx.media3:media3-ui:1.2.1")
