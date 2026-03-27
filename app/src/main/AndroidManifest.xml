@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/xml/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
@@ -15,7 +15,7 @@
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
         
         <activity
-            android:name=".MainActivity"
+            android:name="com.jm.musicplayer.MainActivity"
             android:exported="true"
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
             <intent-filter>
@@ -25,11 +25,13 @@
         </activity>
 
         <service
-            android:name=".audio.PlaybackService"
-            android:exported="true">
+            android:name="com.jm.musicplayer.audio.PlaybackService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
             <intent-filter>
                 <action android:name="androidx.media3.session.MediaSessionService" />
             </intent-filter>
         </service>
+
     </application>
 </manifest>
