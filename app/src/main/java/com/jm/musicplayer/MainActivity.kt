@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -19,6 +20,7 @@ import com.jm.musicplayer.audio.JMPlayerViewModel
 import com.jm.musicplayer.data.MusicScanner
 import com.jm.musicplayer.data.Song
 import com.jm.musicplayer.ui.screens.LibraryScreen
+import com.jm.musicplayer.ui.screens.NowPlayingScreen
 import com.jm.musicplayer.ui.theme.JMMusicPlayerTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -52,7 +54,6 @@ class MainActivity : ComponentActivity() {
                 val songs by songsState.collectAsState()
                 val currentTrackId by viewModel.currentPlayingTrackId.collectAsState()
 
-                // Surface fillMaxSize ensures we use the whole screen
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -69,20 +70,12 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("now_playing") {
-                            // Temporary placeholder to prevent crash until next file is added
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                Text(
-                                    text = "NOW PLAYING SCREEN",
-                                    modifier = Modifier.align(androidx.compose.ui.Alignment.Center),
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Button(
-                                    onClick = { navController.popBackStack() },
-                                    modifier = Modifier.padding(16.dp)
-                                ) {
-                                    Text("Back to Library")
-                                }
-                            }
+                            // Finding the current song object to pass to the UI
+                            val currentSong = songs.find { it.id == currentTrackId }
+                            NowPlayingScreen(
+                                song = currentSong,
+                                onBack = { navController.popBackStack() }
+                            )
                         }
                     }
                 }
